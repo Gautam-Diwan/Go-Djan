@@ -77,7 +77,7 @@ func authenticateUser(next http.Handler) http.Handler {
 
 		// Check token expiration
 		if jsonToken.Expiration.Before(time.Now()) {
-			writeJSON(w, http.StatusUnauthorized, M{"error": "Token Expired"})
+			http.Redirect(w, r, "/auth/login/", http.StatusUnauthorized)
 			return
 		}
 		log.Printf("jsonToken: %v\n", jsonToken)
@@ -90,8 +90,6 @@ func authenticateUser(next http.Handler) http.Handler {
 		log.Printf("user_id: %v\n", user_id)
 		// Fetch the user from the database
 		client := GetClient()
-		all_users, err := client.User.Query().All(context.Background())
-		log.Printf("user: %v\n", all_users)
 
 		user, err := client.User.Get(context.Background(), user_id)
 		if err != nil {

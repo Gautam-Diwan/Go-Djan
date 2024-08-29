@@ -19,7 +19,7 @@ func getPasetoKey() []byte {
 	pasetoKeyHex := viper.GetString("PASETO_KEY")
 	pasetoKey, err := hex.DecodeString(pasetoKeyHex)
 	if err != nil {
-		log.Fatalf("failed to generate PASETO key: %v", err)
+		log.Panic("failed to generate PASETO key: ", err)
 	}
 	return pasetoKey
 }

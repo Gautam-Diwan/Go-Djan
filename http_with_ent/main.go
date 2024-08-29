@@ -41,25 +41,25 @@ func main() {
 	user_router.HandleFunc("PATCH /{id}", updateUserById)
 	user_router.HandleFunc("DELETE /{id}", deleteUserById)
 
+	friends_router := http.NewServeMux()
+	friends_router.HandleFunc("POST /", addFriendById)
+	friends_router.HandleFunc("DELETE /", deleteFriendById)
+
 	blog_router := http.NewServeMux()
 	blog_router.HandleFunc("GET /", getBlogs)
 	blog_router.HandleFunc("GET /{id}", getBlogById)
 	blog_router.HandleFunc("POST /", createBlog)
 	blog_router.HandleFunc("PATCH /{id}", updateBlogById)
 
-	friends_router := http.NewServeMux()
-	friends_router.HandleFunc("POST /", addFriendById)
-	friends_router.HandleFunc("DELETE /", deleteFriendById)
+	tags_router := http.NewServeMux()
+	tags_router.HandleFunc("PATCH /{id}", updateTagById)
+	tags_router.HandleFunc("GET /", getTags)
 
 	api_router := http.NewServeMux()
 	api_router.Handle("/user/", http.StripPrefix("/user", user_router))
 	api_router.Handle("/blog/", http.StripPrefix("/blog", blog_router))
 	api_router.Handle("/friend/", http.StripPrefix("/friend", friends_router))
-
-	crud_router := http.NewServeMux()
-	crud_router.HandleFunc("/view/", makeHandler(viewHandler))
-	crud_router.HandleFunc("/edit/", makeHandler(editHandler))
-	crud_router.HandleFunc("/save/", makeHandler(saveHandler))
+	api_router.Handle("/tag/", http.StripPrefix("/tag", tags_router))
 
 	login_router := http.NewServeMux()
 	login_router.HandleFunc("POST /signout/", signOutHandler)
@@ -69,7 +69,6 @@ func main() {
 	router := http.NewServeMux()
 	router.Handle("/auth/", http.StripPrefix("/auth", login_router))
 	router.Handle("/api/", http.StripPrefix("/api", authenticateUser(api_router)))
-	router.Handle("/custom/", http.StripPrefix("/custom", crud_router))
 
 	stack := createStack(
 		logging,

@@ -63,7 +63,7 @@ func getBlogs(w http.ResponseWriter, r *http.Request) {
 	tagCategory := r.URL.Query().Get("category")
 
 	// Build the query
-	query := client.Blog.Query().WithUser()
+	query := client.Blog.Query().WithUser().WithTags()
 
 	if tagCategory != "" {
 		query = query.Where(blog.HasTagsWith(tag.CategoryEQ(tag.Category(tagCategory))))
@@ -513,7 +513,18 @@ func deleteFriendById(w http.ResponseWriter, r *http.Request) {
 
 func getTags(w http.ResponseWriter, r *http.Request) {
 	client := GetClient()
-	tags, err := client.Tag.Query().All(context.Background())
+	var tags []struct {
+		TagUpdateRequest
+		ID    int `json:"id"`
+		Count int `json:"blogs_count"`
+	}
+	err := client.Blog.Query().QueryTags().
+		GroupBy(blog.FieldID, tag.Columns...).
+		Aggregate(
+			ent.As(ent.Count(), "blogs_count"),
+		).
+		Scan(r.Context(), &tags)
+		// All(context.Background())
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, M{"error": err.Error()})
 		return
