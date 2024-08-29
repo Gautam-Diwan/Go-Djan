@@ -50,6 +50,7 @@ func main() {
 	blog_router.HandleFunc("GET /{id}", getBlogById)
 	blog_router.HandleFunc("POST /", createBlog)
 	blog_router.HandleFunc("PATCH /{id}", updateBlogById)
+	blog_router.HandleFunc("DELETE /{id}", deleteByBlogId)
 
 	tags_router := http.NewServeMux()
 	tags_router.HandleFunc("PATCH /{id}", updateTagById)

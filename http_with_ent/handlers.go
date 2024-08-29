@@ -524,7 +524,6 @@ func getTags(w http.ResponseWriter, r *http.Request) {
 			ent.As(ent.Count(), "blogs_count"),
 		).
 		Scan(r.Context(), &tags)
-		// All(context.Background())
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, M{"error": err.Error()})
 		return
