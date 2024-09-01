@@ -100,14 +100,39 @@ func authenticateUser(next http.Handler) http.Handler {
 	})
 }
 
+var allowedOrigins = []string{
+	"http://localhost",
+	"http://127.0.0.1",
+	"https://localhost",
+	"https://127.0.0.1",
+}
+
 // CORS middleware to handle CORS and set headers
+// We are allowing only local requests currently
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set CORS headers
-		// Allow all origins for demonstration purposes
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		origin := r.Header.Get("Origin")
+
+		// Check if the origin is in the list of allowed origins
+		allowed := false
+		for _, allowedOrigin := range allowedOrigins {
+			if strings.HasPrefix(origin, allowedOrigin) {
+				allowed = true
+				break
+			}
+		}
+
+		if allowed {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		} else {
+			// Deny the request if the origin is not allowed
+			writeJSON(w, http.StatusForbidden, M{"error": "Cross Origin Forbidden"})
+			return
+		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		// OPTIONS Header is used just to give the headers so returning it here only
 		if r.Method == http.MethodOptions {
