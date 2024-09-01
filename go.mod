@@ -1,4 +1,4 @@
-module example/hello
+module go/djan
 
 go 1.23.0
 
