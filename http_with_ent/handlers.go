@@ -7,7 +7,6 @@ import (
 	"example/hello/http_with_ent/ent/blog"
 	"example/hello/http_with_ent/ent/tag"
 	"example/hello/http_with_ent/ent/user"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -140,7 +139,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusUnauthorized, M{"error": err.Error()})
 		return
 	}
-	log.Printf("login_json: %v\n", login_json)
 
 	user, err := client.User.
 		Query().
@@ -163,7 +161,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		IssuedAt:   time.Now(),
 		Expiration: time.Now().Add(24 * time.Hour),
 	}
-	log.Printf("pasetoKey: %v\n", pasetoKey)
 	encryptedToken, err := token.Encrypt(pasetoKey, jsonToken, nil)
 	if err != nil {
 		writeJSON(w, http.StatusUnauthorized, M{"error": "Internal Server Error"})
@@ -184,7 +181,6 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, M{"error": err.Error()})
 		return
 	}
-	log.Printf("signup_json: %v\n", signup_json)
 
 	// Check if user already exists
 	_, err := client.User.
@@ -310,7 +306,6 @@ func updateUserById(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch existing user to ensure it exists
 	user, err := client.User.Get(r.Context(), id)
-	fmt.Printf("user: %v\n", user)
 	if err != nil {
 		var notFoundError *ent.NotFoundError
 		if errors.As(err, &notFoundError) {
@@ -331,18 +326,17 @@ func updateUserById(w http.ResponseWriter, r *http.Request) {
 	if user_json.Age != nil {
 		update = update.SetAge(*user_json.Age)
 	}
-	log.Printf("user_json: %v\n", user_json)
-	log.Printf("user_json.IsActive: %v\n", *user_json.IsActive)
 	if user_json.IsActive != nil {
 		update = update.SetIsActive(*user_json.IsActive)
 	}
+	log.Printf("user_json: %v\n", user_json)
 
 	updatedUser, err := update.Save(r.Context())
-	log.Printf("updatedUser: %v\n", updatedUser)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, M{"error": err.Error()})
 		return
 	}
+	log.Printf("updatedUser: %v\n", updatedUser)
 
 	writeJSON(w, http.StatusOK, updatedUser)
 }
@@ -396,11 +390,11 @@ func updateBlogById(w http.ResponseWriter, r *http.Request) {
 	log.Printf("blog_json: %v\n", blog_json)
 
 	updated_blog, err := update.Save(r.Context())
-	log.Printf("updated_blog: %v\n", updated_blog)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, M{"error": err.Error()})
 		return
 	}
+	log.Printf("updated_blog: %v\n", updated_blog)
 
 	writeJSON(w, http.StatusOK, updated_blog)
 }
@@ -457,12 +451,10 @@ func addFriendById(w http.ResponseWriter, r *http.Request) {
 	client := GetClient()
 
 	var request FriendRequest
-	log.Printf("request: %v\n", request)
 	if err := readJSON(w, r, &request); err != nil {
 		writeJSON(w, http.StatusBadRequest, M{"message": err.Error()})
 		return
 	}
-	log.Printf("request: %v\n", request)
 	// Fetch users to validate existence
 	user_entity := GetUserFromContext(r.Context())
 	log.Printf("user_entity: %v\n", user_entity)

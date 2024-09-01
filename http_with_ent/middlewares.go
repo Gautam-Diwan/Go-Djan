@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/hex"
 	"log"
 	"net/http"
 	"strconv"
@@ -67,8 +66,6 @@ func authenticateUser(next http.Handler) http.Handler {
 		var jsonToken paseto.JSONToken
 		var footer string
 		pasetoToken := paseto.NewV2()
-		log.Printf("pasetoKey: %v\n", pasetoKey)
-		log.Printf("hex.EncodeToString(pasetoKey): %v\n", hex.EncodeToString(pasetoKey))
 
 		if err := pasetoToken.Decrypt(tokenString, pasetoKey, &jsonToken, &footer); err != nil {
 			writeJSON(w, http.StatusUnauthorized, M{"error": "Invalid token"})
@@ -80,14 +77,12 @@ func authenticateUser(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/auth/login/", http.StatusUnauthorized)
 			return
 		}
-		log.Printf("jsonToken: %v\n", jsonToken)
 		user_id_string := jsonToken.Subject
 		user_id, err := strconv.Atoi(user_id_string)
 		if err != nil {
 			writeJSON(w, http.StatusUnauthorized, M{"error": err.Error()})
 			return
 		}
-		log.Printf("user_id: %v\n", user_id)
 		// Fetch the user from the database
 		client := GetClient()
 

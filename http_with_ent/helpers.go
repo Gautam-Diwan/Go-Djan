@@ -38,6 +38,7 @@ func writeJSON(w http.ResponseWriter, code int, data interface{}) {
 
 	if err != nil {
 		log.Println(err)
+		errorResponse(w, http.StatusInternalServerError, "internal error")
 	}
 }
 func errorResponse(w http.ResponseWriter, code int, errs interface{}) {
