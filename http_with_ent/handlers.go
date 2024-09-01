@@ -88,7 +88,7 @@ func getUserById(w http.ResponseWriter, r *http.Request) {
 	user, err := client.User.
 		Query().
 		Where(user.ID(id)).
-		WithBlogs().
+		WithBlogs(func(bq *ent.BlogQuery) { bq.WithTags() }).
 		WithFriends().
 		Only(r.Context())
 
